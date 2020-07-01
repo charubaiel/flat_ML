@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 import joblib
 import collections
 
@@ -50,12 +51,14 @@ def predict_price(data=None,log1p=False,alg=lgb):
     for i,al in enumerate([knn,cat,lgb]):
         print(i,' ',al.__class__.__name__)
 
-    num = int(input())
+    num = input()
     if num=='':
-        num=2
-    alg = [knn,cat,lgb][num]
-    price=alg.predict(cat_df)
+        price = [model.predict(cat_df) for model in [knn,cat,lgb]]
+    else :
+        alg = [knn,cat,lgb][int(num)]
+        price=alg.predict(cat_df)
+
     return(price) 
 
 pr = predict_price()
-print(pr[0])
+print(pr,'\n Mean: ',np.mean(pr))
