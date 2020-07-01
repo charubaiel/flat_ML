@@ -58,9 +58,6 @@ for bedrooms in [one,two,three,other]:
 df=pd.DataFrame(d)
 
 print(df.shape)
-# Transforming
-#df.dropna(inplace=True)
-#df.columns = ['date','adress','district','info','price']
 
 #adress fixing
 df.adress=df.adress.str.replace(r'\.|-','')
@@ -125,12 +122,16 @@ df[['floor','max_floors']]=df['floor'].str.split('/',expand=True)
 df['floor'] = df['floor'].astype(int)
 df['max_floors'] = df['max_floors'].replace(regex=r'\D+',value='').astype(int)
 df['rubm2'] = df['price']/df['m2']
+df.clean = df.street + ' '+ df.dom.astype('str')
+df.district=df.district.fillna('Missed')
 df.to_csv(f'avito_data_{time.localtime().tm_yday}.csv',index=False)
-base_df = pd.read_csv('/home/charubaiel/avito_data_clean.csv')
+base_df = pd.read_csv('data/avito_data_clean.csv')
 print('old_shape :', base_df.shape)
 
 new_df = pd.concat([base_df,df])
 new_df = new_df.drop_duplicates()
-new_df.to_csv(f'/home/charubaiel/avito_data_clean.csv',index=False)
+df.district=df.district.fillna('Missed')
+df.clean = df.street + ' '+ df.dom.astype('str')
+new_df.to_csv('data/avito_data_clean.csv',index=False)
 print('new_df shape:',new_df.shape)
 driver.close()
