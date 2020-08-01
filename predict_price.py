@@ -23,7 +23,7 @@ def predict_price(data=None,log1p=False,alg=lgb):
         d['dom'] = int(d['dom'])
         d['floor'] = int(d['floor'])
         d['max_floors']=int(d['max_floors'])
-        d['m2']=float(d['m2'].replace(',','.'))
+        d['m2']=float(d['m2'].replace(',','.')
         d['m2_range']=df['m2_range'].unique()[[(d['m2'] in i ) for i in df['m2_range'].unique()]][0]
         d['rooms'] = str(d['rooms'])
     d['street'] = df[df.street.str.contains(d['street'])].street.mode()[0]
@@ -47,7 +47,7 @@ def predict_price(data=None,log1p=False,alg=lgb):
             print('some info from : ',home_df['clean'][0])
             cat_df=home_df.apply(lambda x: d_[x.name].transform(x) if x.name in list(d_.keys()) else x)
     cat_df = cat_df[cat.feature_names_]
-    print('Choose algoritm with his num:')
+    print('Choose algoritm by his num:')
     for i,al in enumerate([knn,cat,lgb]):
         print(i,' ',al.__class__.__name__)
 
