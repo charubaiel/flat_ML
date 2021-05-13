@@ -8,13 +8,26 @@ from tqdm import tqdm
 from collections import defaultdict
 import numpy as np
 
+
+month = defaultdict(list)
+for j,i in enumerate(['янв',"февр","март","апр","ма","июн","июл","авг","сент","окт","ноя","дек"]):
+    month[i]=f'{j+1}'
+
+def month_fix(x):
+    for i in month.keys():
+        x=re.sub(f'{i}\w+',month[i],x)
+    x=str(pd.datetime.today().year)+' '+x
+    return pd.to_datetime(x,format='%Y %d %m %H:%M')
+
+
+
 one= 'https://www.avito.ru/volgograd/kvartiry/prodam/1-komnatnye/vtorichka-ASgBAQICAUSSA8YQAkDmBxSMUsoIFIBZ?cd=1'
 two = 'https://www.avito.ru/volgograd/kvartiry/prodam/2-komnatnye/vtorichka-ASgBAQICAUSSA8YQAkDmBxSMUsoIFIJZ?cd=1'
 three = 'https://www.avito.ru/volgograd/kvartiry/prodam/3-komnatnye/vtorichka-ASgBAQICAUSSA8YQAkDmBxSMUsoIFIRZ?cd=1'
 other = 'https://www.avito.ru/volgograd/kvartiry/prodam/vtorichka-ASgBAQICAUSSA8YQAUDmBxSMUg?cd=1&f=ASgBAQICAUSSA8YQAkDmBxSMUsoIlPzPMv5YilmarAGYrAGWrAGUrAGIWYZZ'
 
 d = defaultdict(list)
-for bedrooms in [one,two,three,other]:
+for bedrooms in [three,two,one,other]:
     url = bedrooms
     driver = webdriver.Chrome(chrome.ChromeDriverManager().install())
     driver.get(url)
@@ -22,14 +35,11 @@ for bedrooms in [one,two,three,other]:
     pages = int(soap.findAll('span',{'class':'pagination-item-1WyVp'})[-2].text)
     
     for i in tqdm(range(pages),position=0):
-        time.sleep(3)
+        time.sleep(np.random.randint(1,5))
         soap = bs(driver.page_source,'html.parser')
-        if soap.find('div',{'id':'main-message'}) == None:
-            pass
-        else:
-            time.sleep(np.random.randint(1,7))
-            driver.refresh()
+
         adress=soap.find_all('div',{'itemprop':'address'})
+
         for i in adress:
             d['adress'].append(i.find('span',{'class':'item-address__string'}).get_text(strip=True))
 
@@ -52,7 +62,7 @@ for bedrooms in [one,two,three,other]:
         for i in data:
             d['date'].append(i['data-tooltip'])
         #for key in d.keys():
-            #print(key,len(d[key]))
+        #    print(key,len(d[key]))
         driver.find_element_by_xpath('//span[@data-marker="pagination-button/next"]').click()
 
 
@@ -113,21 +123,23 @@ for bedrooms in [one,two,three,other]:
 
     df['clean'] = df['clean'].str.replace('^ ','')
 
-    df = df.drop(df[df['dom']=='None'].index)
+df = df.drop(df[df['dom']=='None'].index)
+df['info'] = df['info'].str.replace('\n','')
 
-    df[['rooms','m2','floor']]=df['info'].str.split(',',expand=True).fillna('Broke')
-    df.rooms=df.rooms.str.replace('-к квартира','')
-    df.loc[:,'price']=df.loc[:,'price'].replace(regex=r'\D*',value='').astype(int)
-    df=df.drop(df.query('m2 == "Broke"').index)
-    df.loc[:,'m2']=df.loc[:,'m2'].replace(regex=r' \D+',value='').astype(float)
-    df[['floor','max_floors']]=df['floor'].str.split('/',expand=True)
-    df['floor'] = df['floor'].astype(int)
-    df['max_floors'] = df['max_floors'].replace(regex=r'\D+',value='').astype(int)
-    df['rubm2'] = df['price']/df['m2']
-    df.clean = df.street + ' '+ df.dom.astype('str')
-    df.district=df.district.fillna('Missed')
-    done_rate += 1
-    df.to_csv(f'data/avito_data_{time.localtime().tm_yday}_{done_rate}.csv',index=False)
+df[['rooms','m2','floor']]=df['info'].str.split(',',expand=True).fillna('Broke')
+df.rooms=df.rooms.str.replace('-к квартира','')
+df.rooms = df['rooms'].str.replace(' ','')
+df.loc[:,'price']=df.loc[:,'price'].replace(regex=r'\D*',value='').astype(int)
+df=df.drop(df.query('m2 == "Broke"').index)
+df.loc[:,'m2']=df.loc[:,'m2'].replace(regex=r' \D+',value='').astype(float)
+df[['floor','max_floors']]=df['floor'].str.split('/',expand=True)
+df['floor'] = df['floor'].astype(int)
+df['max_floors'] = df['max_floors'].replace(regex=r'\D+',value='').astype(int)
+df['rubm2'] = df['price']/df['m2']
+df.clean = df.street + ' '+ df.dom.astype('str')
+df.district=df.district.fillna('Missed')
+df.date = df['date'].fillna(method='ffill').apply(month_fix)
+df.to_csv(f'avito_data_{time.localtime().tm_yday}.csv',index=False)
 base_df = pd.read_csv('data/avito_data_clean.csv')
 print('old_shape :', base_df.shape)
 

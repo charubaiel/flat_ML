@@ -1,9 +1,9 @@
 # flat_ML
-Pet project on finding fare apartament price in my hometown.
+Пет-проект по поиску оптимальных цен на жилье в родном городе
 # Purpose
-Solving my problems with fun and ML\DL technilogies.  
-On early stages I try to analyse , visualize market prices. Later with more data i will try to solve more deep problems like sold price, season activity , neighbour social goods etc.
+Попытаться с помощью МЛ\ДЛ решить насущные проблемы, глубже разобраться в области.
+На ранних стадиях при малых данных первоначальная цель - анализ рынка, визуализация и поиск инсайтов\паттернов, поиск цены продажи. В дальнейшем при увеличении кол-ва данных появиться возможность анализа признаков успешно продаваемой квартиры, сравнение с ценами на аренду, сезонная активность, временные изменения рынка, оценка по близлежащим социально-культурным объектам и др.
 # FAQ
-avito_pars - parsing file with little preprocessing.  
-apart_research - notebook with EDA, FE and general model building.  
-predict_price - script for common tests and use.  
+avito_pars - файл парсинга с минимально необходимым препроцессингом данных. 
+apart_research - тетрадь с анализом данных, созданием фичей, выбором,оптимизацией, валидацией моделей.    
+predict_MVP - небольшой скрипт для проверки и использования. 
